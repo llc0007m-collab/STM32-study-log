@@ -16,7 +16,6 @@
 *.uvgui.*
 *.bak
 *.tmp
-*.lnk
 
 # Generated output directories
 Objects/
