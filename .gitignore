@@ -9,13 +9,14 @@
 *.dep
 *.crf
 *.lst
-*.build_log.htm
+*.htm
 
 # Keil user/interface state
 *.uvguix.*
 *.uvgui.*
 *.bak
 *.tmp
+*.lnk
 
 # Generated output directories
 Objects/
