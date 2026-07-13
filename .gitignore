@@ -1,0 +1,27 @@
+# Keil build outputs
+*.o
+*.d
+*.axf
+*.hex
+*.bin
+*.map
+*.lnp
+*.dep
+*.crf
+*.lst
+*.htm
+
+# Keil user/interface state
+*.uvguix.*
+*.uvgui.*
+*.bak
+*.tmp
+*.lnk
+
+# Generated output directories
+Objects/
+Listings/
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
