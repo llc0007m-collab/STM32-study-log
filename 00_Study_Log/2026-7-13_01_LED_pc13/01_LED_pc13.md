@@ -2,6 +2,10 @@
 
 ## 点亮pc13 led
 
+- 学习日期 : 2026/7/13
+
+- 状态 : 已完成
+
 这是我学习STM32的第一次尝试，跟随[江协科技 # STM32入门教程-2023版](https://www.bilibili.com/video/BV1th411z7sn/?p=4&spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=de1141d26d96f000f44e785efa89f5a9)的学习，学会了如何新建工程以及标准库的初步使用，并成功地点亮了pc13 led。
 
 ### 新建工程步骤
