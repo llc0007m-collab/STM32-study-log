@@ -24,9 +24,7 @@
 3. LED 不需要高速翻转，因此 GPIO 输出速度设置为 2 MHz；
 4. 本工程按照“PC13 输出低电平时 LED 点亮”的方式驱动，具体有效电平仍应以开发板原理图为准。
 
-
-
-## 工程源码位于 [`01_LED_pc13/user/main.c`](../../01_LED_pc13/user/main.c)
+## 工程源码 [`01_LED_pc13/user/main.c`](../../01_LED_pc13/user/main.c)
 
 ```c
 GPIO_InitTypeDef gpio_init = {0};
@@ -41,8 +39,4 @@ GPIO_Init(GPIOC, &gpio_init);
 GPIO_ResetBits(GPIOC, GPIO_Pin_13);
 ```
 
-
-
-
-
-    感谢[江协科技](https://space.bilibili.com/383400717)的 STM32 入门教程。
+感谢[江协科技](https://space.bilibili.com/383400717)的 STM32 入门教程。
