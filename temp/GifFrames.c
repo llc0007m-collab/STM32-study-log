@@ -3,7 +3,6 @@
 /*
  * Each frame is 1024 bytes in SSD1306 page order.
  * The bytes are RLE-compressed, then Base64-encoded.
- * Data is split into .inc files only to keep this generated source readable.
  */
 
 static const uint16_t OLED_GifFrameOffset[OLED_GIF_FRAME_COUNT + 1U] =
@@ -14,11 +13,7 @@ static const uint16_t OLED_GifFrameOffset[OLED_GIF_FRAME_COUNT + 1U] =
 };
 
 static const char OLED_GifRleBase64[] =
-#include "GifData00.inc"
-#include "GifData01.inc"
-#include "GifData02.inc"
-#include "GifData03.inc"
-#include "GifData04.inc"
+#include "GifData.inc"
 ;
 
 const uint16_t OLED_GifDelayMs[OLED_GIF_FRAME_COUNT] =
@@ -34,27 +29,22 @@ static uint8_t OLED_Base64Value(char Character)
     {
         return (uint8_t)(Character - 'A');
     }
-
     if ((Character >= 'a') && (Character <= 'z'))
     {
         return (uint8_t)(Character - 'a' + 26);
     }
-
     if ((Character >= '0') && (Character <= '9'))
     {
         return (uint8_t)(Character - '0' + 52);
     }
-
     if (Character == '+')
     {
         return 62U;
     }
-
     if (Character == '/')
     {
         return 63U;
     }
-
     return 0U;
 }
 
@@ -72,12 +62,10 @@ static uint8_t OLED_GifReadRleByte(uint16_t ByteIndex)
     {
         return (uint8_t)((Value0 << 2U) | (Value1 >> 4U));
     }
-
     if (ByteInGroup == 1U)
     {
         return (uint8_t)((Value1 << 4U) | (Value2 >> 2U));
     }
-
     return (uint8_t)((Value2 << 6U) | Value3);
 }
 
@@ -100,11 +88,9 @@ void OLED_GifDecodeFrame(uint16_t FrameIndex, uint8_t *FrameBuffer)
     {
         uint8_t RunLength = OLED_GifReadRleByte(ReadIndex);
         uint8_t Value = OLED_GifReadRleByte((uint16_t)(ReadIndex + 1U));
-
         ReadIndex = (uint16_t)(ReadIndex + 2U);
 
-        while ((RunLength > 0U) &&
-               (WriteIndex < OLED_GIF_FRAME_SIZE))
+        while ((RunLength > 0U) && (WriteIndex < OLED_GIF_FRAME_SIZE))
         {
             FrameBuffer[WriteIndex] = Value;
             WriteIndex++;
