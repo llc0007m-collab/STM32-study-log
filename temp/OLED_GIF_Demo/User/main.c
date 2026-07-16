@@ -6,12 +6,14 @@
 int main(void)
 {
     uint16_t FrameIndex = 0U;
+    static uint8_t FrameBuffer[OLED_GIF_FRAME_SIZE];
 
     OLED_Init();
 
     while (1)
     {
-        OLED_ShowFrame(OLED_GifFrames[FrameIndex]);
+        OLED_GifDecodeFrame(FrameIndex, FrameBuffer);
+        OLED_ShowFrame(FrameBuffer);
         Delay_ms(OLED_GifDelayMs[FrameIndex]);
 
         FrameIndex++;
