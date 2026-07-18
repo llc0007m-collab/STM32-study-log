@@ -13,5 +13,9 @@ void Blink07()
 		GPIO_SetBits(GPIOA,All_Pins);
 		GPIO_ResetBits(GPIOA, Pin);
 		step++;
+	if (step >= 8)
+	{
+	step = 0;
+	}
 	}
 }

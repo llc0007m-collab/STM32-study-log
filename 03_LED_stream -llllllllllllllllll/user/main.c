@@ -15,8 +15,9 @@ int main()
 	{
 	GPIO_SetBits(GPIOC, GPIO_Pin_13);
 	Delay_ms(500);
-	Blink07();
 	GPIO_ResetBits(GPIOC, GPIO_Pin_13);
-	Delay_ms(500);
+	Delay_ms(300);
+	Blink07();
+	Delay_ms(200);
 	}
 }

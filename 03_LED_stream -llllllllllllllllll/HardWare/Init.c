@@ -24,5 +24,5 @@ void Init_A0A7()
 		GPIO_Pin_7;
 	A0A7.GPIO_Speed = GPIO_Speed_50MHz;
 		
-	GPIO_Init(GPIOC , &A0A7);
+	GPIO_Init(GPIOA , &A0A7);
 	}
