@@ -765,6 +765,31 @@
               <FileType>5</FileType>
               <FilePath>.\HardWare\Blink0-7.h</FilePath>
             </File>
+            <File>
+              <FileName>OLED.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\HardWare\OLED.c</FilePath>
+            </File>
+            <File>
+              <FileName>OLED.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\HardWare\OLED.h</FilePath>
+            </File>
+            <File>
+              <FileName>OLED_Font.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\HardWare\OLED_Font.h</FilePath>
+            </File>
+            <File>
+              <FileName>Countsensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\HardWare\Countsensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>Countsensor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\HardWare\Countsensor.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

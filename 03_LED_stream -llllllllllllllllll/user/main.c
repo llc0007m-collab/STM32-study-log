@@ -2,6 +2,8 @@
 #include "Delay.h"
 #include "Init.h"
 #include "Blink0-7.h"
+#include "OLED.h"
+#include "Countsensor.h"
 
 int main()
 {
@@ -10,6 +12,10 @@ int main()
 
 	Init_pc13();
 	Init_A0A7();
+	OLED_Init();
+	Init_Count();
+	
+	OLED_ShowChar(2,5,'A');
 		
 	while(1)
 	{
