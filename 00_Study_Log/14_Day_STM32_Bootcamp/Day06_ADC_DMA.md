@@ -79,16 +79,17 @@
 - [ ] `8-1` 中能完成 SRAM 数组到 SRAM 数组的 M2M 数据搬运，并说明 CNDTR 清零后普通模式停止。
 - [ ] `8-2` 中能说明 ADC1 的 DMA 请求固定进入 `DMA1_Channel1`，外设地址固定为 `&ADC1->DR`、存储器地址递增、循环模式开启。
 - [ ] 掌握 DMA 通道配置前先禁用、配置后清标志再使能的稳健顺序；知道 TC/HT/TE 标志与中断用途。
-- [ ] 理解 DMA 正在更新数组时 CPU 读取可能得到跨轮次快照；需要一致性时使用半传输/全传输标志、双缓冲思想或短临界区复制。
+- [ ] 理解 DMA 正在更新数组时 CPU 读取可能得到跨轮次快照；关 CPU 中断并不能暂停 DMA，普通“短临界区复制”仍不保证一致。应读取已由 HT/TC 证明完成的半缓冲区，或确认 DMA 已停后复制，或使用双缓冲/序号前后校验重试协议。
 
 ### 必会公式
 
 ```text
 N = 12
-满量程码 = 2^N - 1 = 4095
-理论量化步距 LSB = VREF / 2^N
-理想换算：Vin ≈ ADC_Code × VREF / (2^N - 1)
-理想编码：ADC_Code ≈ Vin / VREF × (2^N - 1)
+最大输出码 = 2^N - 1 = 4095
+量化器步距 LSB = VREF / 2^N = VREF / 4096
+量化模型：ADC_Code = clamp(floor(Vin / LSB), 0, 4095)
+量化模型反算：Vin ≈ ADC_Code × VREF / 4096（或用码桶中点）
+教程常用端点归一化：Vin ≈ ADC_Code × VREF / 4095；它是把 0 与满量程端点对齐的工程近似，不等于 LSB 定义
 Tconv = (采样周期 + 12.5) / fADCCLK
 fADCCLK = fPCLK2 / ADC分频，且不得超过 14 MHz
 DMA目标地址步进 = 目标数据宽度；循环一轮样本数 = CNDTR 初值
@@ -190,7 +191,7 @@ DMA目标地址步进 = 目标数据宽度；循环一轮样本数 = CNDTR 初�
 接线表与实物证据：<填写>
 测量数据/波形：<填写>
 
-请先阅读 D:\STM32_Project\README.md、D:\STM32_Project\.github\AI_REVIEW.md（若存在）、本 Day06 计划和上一份审查报告。检查工程是否严格使用 STM32F103C8T6 + CMSIS + SPL V3.5.0 + Keil MDK 5.43/ArmClang 6.24，禁止 HAL/LL/CubeMX/V3.6.x。只读审查真实源码、uvprojx、启动文件、宏、Include Paths、ADC/DMA 数据流、通道/rank、时钟/采样/校准、DMA 地址/宽度/递增/CNDTR/循环模式、Git 差异和日志链接；用 D:\keil\UV4\UV4.exe 重新构建并读取新日志及 map。不要编造硬件现象，证据标记为 VERIFIED、USER_REPORTED、NOT_PROVEN 或 BLOCKED。
+请先阅读 D:\STM32_Project\README.md、D:\STM32_Project\.github\AI_REVIEW.md（若存在）、本 Day06 计划和上一份审查报告。检查工程是否严格使用 STM32F103C8T6 + CMSIS + SPL V3.5.0 + Keil MDK 5.43/ArmClang 6.24，禁止 HAL/LL/CubeMX/V3.6.x。只读审查真实源码、uvprojx、启动文件、宏、Include Paths、ADC/DMA 数据流、通道/rank、时钟/采样/校准、`VREF/4096` 量化步距与 `/4095` 端点近似的区别、DMA 地址/宽度/递增/CNDTR/循环模式和快照一致性；不得把关 CPU 中断误判为冻结 DMA。继续检查 Git 差异和日志链接；用 D:\keil\UV4\UV4.exe 重新构建并读取新日志（必须 `0 Error / 0 Warning`）及 map。不要编造硬件现象，证据标记为 VERIFIED、USER_REPORTED、NOT_PROVEN 或 BLOCKED。
 
 随后随机出 6 题（可扩展至 8 题），一次只问一题，在我回答前不要提示答案：2 题原理/数据流、1 题公式、1 题接线或结果预测、1 题故障定位、1 题迁移。迁移题必须更换 ADC 通道顺序和 DMA 数组长度/宽度；若我请求实现提示，把该题标为“有辅助”并换参数重考。
 

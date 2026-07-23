@@ -59,7 +59,7 @@
 
 ### 协议、电平与帧
 
-- [ ] 说清 USART、I2C、SPI、CAN、USB 在线数、单双工、同步/异步、电平和网络拓扑上的区别。
+- [ ] 说清 USART、I2C、SPI 在线数、单双工、同步/异步、电平和拓扑上的区别；CAN、USB 只作课程中的概念边界对比，不要求配置、编码或结业验收。
 - [ ] 全双工 TX/RX 必须交叉连接且共地；单向只接一个数据方向；STM32 端使用 3.3 V TTL，不能直接接 RS232 的正负高压。
 - [ ] 区分 TTL（单端）、RS232（反相且高电压）与 RS485（差分）；知道需要相应收发/电平转换器。
 - [ ] 帧由空闲高、起始低、数据位（通常 LSB 先发）、可选校验、停止位组成；双方波特率、字长、校验、停止位必须一致。
@@ -143,7 +143,7 @@ USARTDIV = fPCLK / (16 × baud)
 
 - `D:\STM32_Library\程序源码\程序源码\程序修改说明.pdf` 的 6 条修改中没有 USART 专项；日志写明“Day07 无对应源码勘误”。
 - **FAQ 17**：先下载官方 `9-2 串口发送+接收` 排除自写代码；用官方串口助手按 9600、HEX 收发测试；若官方程序正常则用分块替换定位自写代码；若仍不正常，先 CH340 TXD/RXD 带线短接自环，再 PA9/PA10 短接自环，二者都正常后再互连；`9-4` 还须确认文本包发送操作真的包含约定结尾。
-- **FAQ 18**：`GetFlagStatus` 直接读状态位，`ClearFlag` 清状态位；`GetITStatus` 同时要求状态位和对应中断使能位有效，`ClearITPendingBit` 清中断挂起/状态位。清除函数内部可能相同，但可接受参数范围和语义不同。今天必须用 USART 的 RXNE/RXNEIE 举例说明。
+- **FAQ 18（主归属；Day3/Day4 仅复习引用）**：`GetFlagStatus` 直接读状态位，`ClearFlag` 清状态位；`GetITStatus` 同时要求状态位和对应中断使能位有效，`ClearITPendingBit` 清中断挂起/状态位。清除函数内部可能相同，但可接受参数范围和语义不同。今天必须用 USART 的 RXNE/RXNEIE 举例说明。
 
 ## 第一周检查点（Day01–Day07）
 
@@ -219,11 +219,11 @@ Day07日志：<填写>
 串口原始日志/波形/照片：<填写>
 Day01-Day07证据索引：<填写>
 
-先读 D:\STM32_Project\README.md、D:\STM32_Project\.github\AI_REVIEW.md（若存在）、本计划和上一份审查报告。确认 STM32F103C8T6 + CMSIS + SPL V3.5.0 + Keil MDK 5.43/ArmClang 6.24，禁止 HAL/LL/CubeMX/V3.6.x。只读检查 uvprojx、启动文件、宏、Include Paths、PA9/PA10、USART1/APB2、BRR/8N1、TXE/TC/RXNE、NVIC/ISR/volatile、HEX与文本包状态机、长度边界、Git差异和日志链接。用 D:\keil\UV4\UV4.exe 重新构建并读新日志/map。硬件证据只能标 VERIFIED、USER_REPORTED、NOT_PROVEN 或 BLOCKED，不能编造。
+先读 D:\STM32_Project\README.md、D:\STM32_Project\.github\AI_REVIEW.md（若存在）、本计划和上一份审查报告。确认 STM32F103C8T6 + CMSIS + SPL V3.5.0 + Keil MDK 5.43/ArmClang 6.24，禁止 HAL/LL/CubeMX/V3.6.x。只读检查 uvprojx、启动文件、宏、Include Paths、PA9/PA10、USART1/APB2、BRR/8N1、TXE/TC/RXNE、NVIC/ISR/volatile、HEX与文本包状态机、长度边界、Git差异和日志链接。用 D:\keil\UV4\UV4.exe 重新构建并读新日志（必须 `0 Error / 0 Warning`）/map。硬件证据只能标 VERIFIED、USER_REPORTED、NOT_PROVEN 或 BLOCKED，不能编造。
 
 检查 FAQ17 的官方程序→CH340带线自环→PA9/PA10自环→两端互连排障链，以及 FAQ18 的 GetFlagStatus/ClearFlag/GetITStatus/ClearITPendingBit 区别。然后按计划执行 90 分钟第一周检查点，并随机问 8 题，一次只问一题、作答前不提示：3题跨周原理、1题计算、1题接线/波形、2题故障、1题迁移。迁移题要求给文本包新增一条未预告命令并处理未知、超长、缺换行、连续包；如我请求实现提示，标记“有辅助”并换题。
 
-按 20/30/25/15/10 共100分评分，逐条检查硬门槛和第一周≥80门槛，输出文件+行号证据、缺失项、分项得分、PASS/CONDITIONAL/FAIL/BLOCKED、重复问题、48小时补考和 Day08 准入建议。仅当我在本提示中明确授权写文件时，保存到 D:\STM32_Project\AI_Review\YYYY-MM-DD_Day07_USART_Week1.md；否则只在对话输出。
+按 20/30/25/15/10 共100分评分，逐条检查硬门槛和第一周≥80门槛，输出文件+行号证据、缺失项、分项得分、PASS/CONDITIONAL/FAIL/BLOCKED、重复问题、48小时补考和 Day08 准入建议。仅当我在本提示中明确授权写文件时，保存到 D:\STM32_Project\AI_Review\YYYY-MM-DD_Day07_USART_Week1_Checkpoint.md；否则只在对话输出。
 ```
 
 ## 复盘与补考

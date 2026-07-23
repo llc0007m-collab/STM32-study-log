@@ -208,6 +208,7 @@
 
 ```text
 请对我的 Day01 STM32F103 学习成果做严格验收。现在是验收阶段，只读检查，禁止修改任何源码、工程、日志和配置。
+按北京时间（UTC+8）的 00:00～23:59 确定本次审查日期与变更范围。
 
 固定标准：STM32F103C8T6；CMSIS + STM32F10x SPL V3.5.0；Keil MDK 5.43；ArmClang 6.24；禁止 HAL、LL、CubeMX 和 V3.6.x。
 今日计划：D:\STM32_Project\00_Study_Log\14_Day_STM32_Bootcamp\Day01_Foundation_Project.md

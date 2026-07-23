@@ -108,8 +108,8 @@
 
 | 功能 | 教程默认引脚/连接 | GPIO/电气模式 | 学习者实际连接 | 实测结果 |
 |---|---|---|---|---|
-| OLED SCL | PB8 | 软件 I2C 推挽输出（依教程驱动） |  |  |
-| OLED SDA | PB9 | 软件 I2C 推挽输出（依教程驱动） |  |  |
+| OLED SCL | PB8 | 软件 I2C 开漏输出（依教程最终驱动） |  |  |
+| OLED SDA | PB9 | 软件 I2C 开漏输出（依教程最终驱动） |  |  |
 | 按键 1 | PB1，按下接 GND | 上拉输入、低有效 |  |  |
 | 按键 2 | PB11，按下接 GND | 上拉输入、低有效 |  |  |
 | VBAT | 板载电池座/外接 1.8～3.6 V | 后备域电源，严禁反接/过压 |  |  |
@@ -201,7 +201,7 @@
 - 目标工程 `0 Error / 0 Warning`，且下载和真实硬件现象有证据。
 - 闭卷解释时间转换与 RTC 预分频数据流。
 - 完成至少一个不同于教程原参数的时区/时钟迁移。
-- 证明普通复位保持，并对 VDD/VBAT 场景给出实测或明确标为 `NOT_PROVEN`。
+- 证明普通复位保持，并完成“VDD 断电、VBAT 存在”与“VDD/VBAT 均断”两项实测；缺证据必须标 `NOT_PROVEN` 或 `BLOCKED`，且不得判 `PASS`。
 - 日志链接到真实源码，记录至少一个验证或排错闭环。
 
 结论：`PASS` = 总分 ≥80 且硬门槛全过；`CONDITIONAL` = 70～79 或只缺一项可补证据（48 小时内补验）；`FAIL` = <70 或核心原理/迁移失败；`BLOCKED` = 工具/硬件缺失，非学习失败但必须补做。
@@ -210,6 +210,7 @@
 
 ```text
 请验收我的 STM32 两周计划 Day11（Unix/BKP/RTC）。我授权你只读检查 D:\STM32_Project 内的源码、Git 状态、构建输出和我提供的证据，并授权你在验收完成后把报告写入 D:\STM32_Project\AI_Review\YYYY-MM-DD_Day11_Unix_BKP_RTC.md；除该报告外不要修改任何源码、工程或日志。
+按北京时间（UTC+8）的 00:00～23:59 确定本次审查日期与变更范围。
 
 先阅读 README.md、.github\AI_REVIEW.md（若存在）、本日计划、当日日志和上一次报告。确认目标是 STM32F103C8T6、CMSIS + SPL V3.5.0、Keil MDK 5.43/ArmClang 6.24，不得接受 V3.6.0/HAL/LL/CubeMX 混入。用 D:\keil\UV4\UV4.exe 对我指定的 .uvprojx 做一次新构建，核对 0 Error / 0 Warning、.map 资源、DBP/RSF/RTOFF、首次配置、LSE 超时、时间转换边界和 Git diff。
 

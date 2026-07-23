@@ -212,7 +212,7 @@ fSCK = fPCLK / (2,4,8,16,32,64,128,256)
 擦写、跨页和相邻数据证据：<填写>
 故障/状态寄存器记录：<填写>
 
-先读 D:\STM32_Project\README.md、D:\STM32_Project\.github\AI_REVIEW.md（若存在）、本 Day10 计划和上一报告。确认 STM32F103C8T6 + CMSIS + SPL V3.5.0 + Keil MDK 5.43/ArmClang 6.24，禁止 HAL/LL/CubeMX/V3.6.x。只读检查 uvprojx、启动文件、宏、Include Paths、模式0边沿、!!勘误、PA4/5/6/7、SPI1/APB2、TXE/RXNE/BSY/OVR、SS范围、JEDEC ID、WREN/WEL/WIP、擦除、PageProgram、跨页分片、地址/长度溢出、BUSY超时、读回和写保护/FAQ16。分别用 D:\keil\UV4\UV4.exe 新构建两工程并读日志/map；问题给绝对路径+行号。不要编造硬件事实，证据分 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED。
+先读 D:\STM32_Project\README.md、D:\STM32_Project\.github\AI_REVIEW.md（若存在）、本 Day10 计划和上一报告。确认 STM32F103C8T6 + CMSIS + SPL V3.5.0 + Keil MDK 5.43/ArmClang 6.24，禁止 HAL/LL/CubeMX/V3.6.x。只读检查 uvprojx、启动文件、宏、Include Paths、模式0边沿、!!勘误、PA4/5/6/7、SPI1/APB2、TXE/RXNE/BSY/OVR、SS范围、JEDEC ID、WREN/WEL/WIP、擦除、PageProgram、跨页分片、地址/长度溢出、BUSY超时、读回和写保护/FAQ16。分别用 D:\keil\UV4\UV4.exe 新构建两工程并读日志（必须 `0 Error / 0 Warning`）/map；问题给绝对路径+行号。不要编造硬件事实，证据分 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED。
 
 随机问8题，一次一题、回答前不提示：2题SPI模式/数据流、1题时钟或容量计算、2题Flash规则/指令、1题接线波形、1题故障、1题迁移。迁移题给我随机起始地址和300-700B长度，要求跨页分片、地址边界、BUSY超时、读回校验，并模拟写保护或WIP不清；请求实现提示则标“有辅助”并换参数重考。
 

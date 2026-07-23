@@ -71,15 +71,15 @@
 ### 指定寄存器写/读事件流
 
 - [ ] 写：等待 BUSY 清→START→EV5→发送 7 位地址+Transmitter→EV6→发寄存器→EV8/EV8_2→发数据→EV8_2→STOP。
-- [ ] 单字节读：写阶段发送寄存器地址→重复 START/EV5→地址+Receiver/EV6→在最后一字节前关闭 ACK 并申请 STOP→EV7→读 DR→恢复 ACK。
-- [ ] 知道“先关闭 ACK/申请 STOP 再读最后字节”是为了让硬件在最后一个字节产生 NACK 并正确结束，而不是读完后才补动作。
+- [ ] 单字节读：写阶段发送寄存器地址→重复 START/EV5→发送地址+Receiver→等待 `ADDR=1`，但此处不得调用会读取 SR1/SR2、提前清 ADDR 的 `I2C_CheckEvent(EV6)`→在短关键序列中关闭 ACK→读 SR1 后读 SR2 清 ADDR→申请 STOP→等待 RXNE→读 DR→恢复 ACK。
+- [ ] 知道“清 ACK→清 ADDR→申请 STOP→读最后字节”的次序是为了让硬件在唯一字节产生 NACK 并正确结束；如果先用 EV6 检查清掉 ADDR，再关 ACK，就已经过晚。
 - [ ] 多字节读取时，中间字节保持 ACK，末字节 NACK；F1 对 1、2、N>2 字节接收有不同的 ACK/POS/BTF 顺序，必须按 RM0008 的主接收流程实现和验收，不能把单字节函数放循环中冒充连续读。
 
 ### 稳健性与恢复
 
 - [ ] 课程 `MPU6050_WaitEvent` 无限循环只适合演示；实际函数必须有计数/时间截止，返回 `OK/TIMEOUT/NACK/BUS_ERROR/ARBITRATION_LOST/BUS_BUSY` 等可区分状态。
-- [ ] 每次失败保存 SR1/SR2 快照（注意读取副作用），生成 STOP/清错误；必要时禁用 I2C、软件复位再初始化。
-- [ ] SDA 被从机拉低时：切为 GPIO 开漏，释放 SDA，输出最多 9 个 SCL 脉冲，生成 STOP，确认两线高，再恢复 AF_OD/I2C2；每步都有限时。
+- [ ] 每次失败保存 SR1/SR2 快照（注意读取副作用），并按错误分类清理：AF/NACK 在本机仍持有主机事务时清 AF、生成 STOP；BERR/OVR 按参考手册清除并视情况重置外设；ARLO 只清 ARLO、释放总线并退避重试，失去仲裁后不得强行生成 STOP。
+- [ ] BUSY 可能来自合法的另一主机，不能一律做总线恢复；只有确认是单主机系统、事务已超时且 SDA 被卡低时，才切为 GPIO 开漏，释放 SDA，输出最多 9 个 SCL 脉冲，生成 STOP，确认两线高，再恢复 AF_OD/I2C2；每步都有限时。
 - [ ] 不在中断或主循环中永久等事件；上层必须知道采样失败，不能继续使用旧数据假装新数据。
 - [ ] 能对比软件 I2C（边沿由 CPU 控制、便于任意引脚）和硬件 I2C（外设状态机、CPU 负担小、时序严格、错误状态更多）的波形与代码层次。
 
@@ -152,7 +152,7 @@ MPU6050 7位地址：AD0=0 -> 0x68；AD0=1 -> 0x69
 1. 收集工程、日志、基线、构建/map、接线/上拉、ID/数据、波形、错误注入记录。
 2. 只读阅读 `README.md`、`.github\AI_REVIEW.md`（若存在）、本计划和上一报告。
 3. 核查 `.uvprojx`、启动文件、宏、Include Paths，确认只用 CMSIS + SPL V3.5.0。
-4. 审查 APB1/I2C2、PB10/PB11 AF_OD、ClockSpeed、地址表示、EV5/6/7/8/8_2、SR1/SR2 副作用、ACK/POS/STOP、1/2/N 字节分支、超时/错误码/恢复；缺陷给绝对路径+行号。
+4. 审查 APB1/I2C2、PB10/PB11 AF_OD、ClockSpeed、地址表示、EV5/6/7/8/8_2、SR1/SR2 副作用、单字节“清 ACK→清 ADDR→STOP”顺序、1/2/N 字节分支，以及 AF/BERR/ARLO/BUSY 的分类恢复；缺陷给绝对路径+行号。
 5. 用 `D:\keil\UV4\UV4.exe` 重新构建并读新日志/`.map`；核对 Git 差异，验收阶段不修改源码。
 6. 随机口试 7 题、一次一题：2 题事件/寄存器数据流，1 题时钟/上拉计算，1 题单/多字节时序，1 题软件/硬件对比，1 题故障诊断，1 题恢复迁移。
 7. 不提示未答题答案，不把代码推断当硬件事实。
@@ -183,7 +183,7 @@ MPU6050 7位地址：AD0=0 -> 0x68；AD0=1 -> 0x69
 WHO_AM_I/配置/六轴：<填写>
 故障与恢复记录：<填写>
 
-先读 D:\STM32_Project\README.md、D:\STM32_Project\.github\AI_REVIEW.md（若存在）、本计划和上一报告。确认 STM32F103C8T6 + CMSIS + SPL V3.5.0 + Keil MDK 5.43/ArmClang 6.24，禁止 HAL/LL/CubeMX/V3.6.x。只读检查 uvprojx、启动文件、宏、Include Paths、APB1/I2C2、PB10/PB11 AF_OD、PCLK1/CCR/TRISE、7位地址、EV5/EV6/EV7/EV8/EV8_2、SR1/SR2读取副作用、单字节ACK/STOP、1/2/N字节接收、NACK/超时/BUSY/总线恢复和错误传播。用 D:\keil\UV4\UV4.exe 新构建并读取日志/map；问题给绝对路径+行号，不编造硬件事实，证据分 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED。
+先读 D:\STM32_Project\README.md、D:\STM32_Project\.github\AI_REVIEW.md（若存在）、本计划和上一报告。确认 STM32F103C8T6 + CMSIS + SPL V3.5.0 + Keil MDK 5.43/ArmClang 6.24，禁止 HAL/LL/CubeMX/V3.6.x。只读检查 uvprojx、启动文件、宏、Include Paths、APB1/I2C2、PB10/PB11 AF_OD、PCLK1/CCR/TRISE、7位地址、EV5/EV6/EV7/EV8/EV8_2、SR1/SR2读取副作用、单字节“清 ACK→清 ADDR→STOP”顺序、1/2/N字节接收、AF/BERR/ARLO/OVR/超时/BUSY 分类恢复和错误传播；确认 ARLO 后不强发 STOP、合法多主 BUSY 不误做九脉冲。用 D:\keil\UV4\UV4.exe 新构建并读取日志（必须 `0 Error / 0 Warning`）/map；问题给绝对路径+行号，不编造硬件事实，证据分 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED。
 
 随机问7题，一次一题、作答前不提示：2题事件/寄存器数据流、1题时钟或上拉计算、1题单/多字节时序、1题软硬件对比、1题故障诊断、1题迁移。迁移题从 NACK、事件超时、SDA常低中随机指定一个，让我独立检测、恢复并证明下一次WHO_AM_I成功；请求实现提示则标“有辅助”并换故障重考。
 

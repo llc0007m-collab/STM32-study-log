@@ -239,6 +239,7 @@
 
 ```text
 请验收我的 STM32 两周计划 Day13（IWDG/WWDG、内部 Flash、UID）。我授权你只读检查 D:\STM32_Project 的源码、Git、构建和证据，并授权验收后写报告到 D:\STM32_Project\AI_Review\YYYY-MM-DD_Day13_WDG_FLASH.md；除该报告外不要修改源码、工程、选项字节或日志，绝对不要执行 Flash 擦除。
+按北京时间（UTC+8）的 00:00～23:59 确定本次审查日期与变更范围。
 
 先读 README.md、.github\AI_REVIEW.md（若存在）、Day13 计划、当日日志和上次报告。确认 STM32F103C8T6、CMSIS + SPL V3.5.0、Keil MDK 5.43/ArmClang 6.24，拒绝 V3.6.0/HAL/LL/CubeMX。用 D:\keil\UV4\UV4.exe 新构建指定 .uvprojx，核对 0 Error / 0 Warning 和 .map，证明 0x0800FC00 数据页不与程序/常量重叠。
 

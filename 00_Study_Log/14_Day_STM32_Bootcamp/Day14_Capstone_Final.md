@@ -8,9 +8,11 @@
 - 目标：STM32F103C8T6（64 KB Flash、20 KB SRAM）。
 - 唯一软件栈：CMSIS + **STM32F10x SPL V3.5.0**；Keil MDK 5.43、ArmClang 6.24。
 - 禁止混入 `D:\STM32_Library\STM32F10x_StdPeriph_Lib_V3.6.0`，禁止 HAL、LL、CubeMX。
+- CAN、USB、FreeRTOS、FATFS 和网络收集例程不纳入本次结业范围；课程中若出现概念对比，只用于辨析边界，不设置实现任务或结业硬门槛。
 - 参考附件只用于核对，不能把官方 39 个工程原样构建当成自己的闭卷成果。
 - 考试开始前记录基线提交/时间和 `git status --short`。90 分钟功能开始后不得查看教程源码；可查芯片手册与 SPL 函数手册。
 - Codex 验收先只读且不改源码；实物结果只能标 `VERIFIED`、`USER_REPORTED`、`NOT_PROVEN`、`BLOCKED`。
+- Day14 是每日“随机 5～8 题”协议的最终考试例外：按结业要求扩展为 30 题，但仍严格一次只出一题、作答前不提示。
 - 最终 `PASS` 要求总分 **≥85** 且全部硬门槛通过；仅“编译成功”不构成掌握。
 
 ## 1. 8 小时时间表
@@ -120,7 +122,7 @@
 
 - [ ] 定时更新频率：`f_update = f_TIM / ((PSC+1)(ARR+1))`；PWM：`f_PWM=f_TIM/((PSC+1)(ARR+1))`，边沿对齐有效占空近似 `CCR/(ARR+1)`。
 - [ ] 输出比较、舵机脉宽、电机方向/调速；输入捕获 `f_signal=f_counter/CCR`，PWMI 频率/占空比；主从触发；编码器正交方向与溢出。
-- [ ] ADC 12 位：理想码值 `Code≈Vin/Vref×4095`；转换时间 `Tconv=(采样周期+12.5)/f_ADC`；校准、规则序列、扫描/连续/触发、数据对齐。
+- [ ] ADC 12 位：量化步距 `LSB=Vref/4096`；教程端点归一化近似为 `Code≈Vin/Vref×4095`，两种口径不得混称；转换时间 `Tconv=(采样周期+12.5)/f_ADC`；校准、规则序列、扫描/连续/触发、数据对齐。
 - [ ] DMA 外设/存储地址、方向、宽度、增量、计数、单次/循环；ADC 多通道顺序必须与 DMA 缓冲区和宽度一致。
 
 ### 4.3 USART、I2C、SPI
@@ -144,7 +146,7 @@
 |---|---|---|
 | 调度 | TIM2，无外部引脚 | 1 kHz 更新中断，只递增毫秒 tick/置到期标志 |
 | 模拟采集 | ADC1 CH0/CH1：PA0/PA1 | 扫描 + DMA1 循环，缓冲区宽度必须为 16 位 |
-| MPU6050 | I2C1：PB6 SCL、PB7 SDA | 400 kHz 以内，开漏复用+外部上拉，所有等待有超时 |
+| MPU6050 | I2C1 默认映射：PB6 SCL、PB7 SDA | 400 kHz 以内，开漏复用+外部上拉，所有等待有超时；禁止重映射到 PB8/PB9，以免与 OLED 冲突 |
 | OLED | PB8 SCL、PB9 SDA | 教程软件 I2C；主循环低频刷新 |
 | W25Q64 | SPI1：PA5 SCK、PA6 MISO、PA7 MOSI、PA4 CS | 模式 0，CS 推挽；处理 WREN/BUSY/页边界/扇区 |
 | USART | USART1：PA9 TX、PA10 RX | 115200-8-N-1，RXNE ISR 写环形缓冲区 |
@@ -181,9 +183,10 @@ void       Scheduler_RunDueTasks(uint32_t now_ms);
 - TIM2 1 ms ISR：只更新 `volatile uint32_t g_tick_ms` 和必要到期位，不调用 I2C/SPI/OLED/printf/Flash。
 - USART1 RXNE ISR：只把字节放入 256 字节无锁单生产者/单消费者环形缓冲区；满时置 overflow 并丢弃当前帧。
 - EXTI ISR：清挂起位、保存按键事件；主循环以 20 ms 消抖并切换页面/记录状态。
+- ADC 快照必须来自 HT/TC 已完成的半缓冲区，或通过停 DMA/双缓冲/序号重试取得一致视图；关 CPU 中断不能冻结 DMA，不得把普通临界区复制当作一致性证明。
 - 主循环周期：协议每圈；按键 10 ms；MPU 20 ms（50 Hz）；ADC 快照 100 ms；OLED 200 ms；状态 1000 ms；日志默认 1000 ms，可配置 100～60000 ms。
 - 所有周期判断使用无符号差值，允许 `uint32_t` tick 回绕；任务不得用长 Delay。
-- IWDG 目标约 2 s，实际参数按 LSI 容差计算；每个 1 s 健康窗只有在协议、传感器、调度、存储状态机均取得进展时才喂狗。
+- IWDG 目标约 2 s，实际参数按 LSI 容差计算；每个 1 s 健康窗只有在各已启用子系统取得进展，或其故障已被超时捕获并进入明确可服务的降级态时才喂狗；传感器/存储断开不得造成无条件复位风暴。
 - 没有到期任务且 RX 缓冲为空时，临界区内二次检查待办后执行 `__WFI()`，避免检查与睡眠之间丢失唤醒。
 
 ### 5.4 串口命令协议
@@ -247,10 +250,10 @@ W25Q64 每条记录固定 44 字节，按小端逐字段序列化，禁止直接
 |---|---|---|
 | 非法串口包 | 超长、缺 CRLF、未知命令、负数/溢出、半包超时 | 返回/记录对应 ERR，丢弃坏帧，下一合法帧仍可解析 |
 | MPU6050 断开 | 运行中拔除 SDA/SCL 模块连接 | I2C 超时退出，置 SENSOR flag，OLED/串口可用，恢复连接后可重新初始化 |
-| W25Q64 BUSY/写保护 | WP 拉低或受控模拟 BUSY 超时 | 不永久等待、不推进 seq，返回 STORAGE/BUSY，解除后恢复 |
+| W25Q64 BUSY/写保护 | 在专用测试芯片/可擦测试区先保存状态寄存器，再按具体型号手册设置 BP/SRP；需要硬件锁定时才配合 `/WP`，另做受控 BUSY 超时模拟 | 不永久等待、不推进 seq，返回 STORAGE/BUSY；恢复原状态寄存器后回读确认。不得只拉低 `/WP` 就声称阵列已写保护 |
 | 主循环卡死 | 受控调试开关阻塞超过 IWDG 上界 | IWDG 复位；启动报告复位来源和累计次数 |
 | 配置断电恢复 | SAVE 成功后断电；另测保存中断/CRC 损坏 | 成功配置恢复；损坏配置被拒绝并使用安全默认值 |
-| RTC/VBAT | 主电断开后恢复 | 有 VBAT 时 UTC 连续；缺证据则 NOT_PROVEN |
+| RTC/VBAT | 主电断开后恢复 | 有 VBAT 时 UTC 连续；缺证据标 `NOT_PROVEN` 或 `BLOCKED`，且最终不得 `PASS` |
 
 ### 6.3 30 分钟稳定性
 
@@ -341,6 +344,8 @@ Codex 开始计时后从下列四项随机选一项，直到公布前学习者�
 | 17 | USART 无法收发 | 交叉 TX/RX、共地、电平、波特率/端口 |
 | 18 | GetFlagStatus/ClearFlag/GetITStatus/ClearITPendingBit 区别 | 原始标志 vs 中断使能门控、正确清除对象 |
 
+FAQ 主归属唯一映射：1～4、11～14→Day1；5～7、15→Day2；8→Day3；9～10→Day4；16→Day10；17～18→Day7。其他日期出现同一 FAQ 时只标“复习引用”，Day14 本表只做全量复核，不重复计作主落点。
+
 集合必须恰为 `1..18`；Day14 缺任一项即覆盖审计失败。
 
 ## 10. 证据包与 Codex 只读验收
@@ -382,23 +387,24 @@ Codex 开始计时后从下列四项随机选一项，直到公布前学习者�
 - 90 分钟未知功能无实现提示并通过正常/边界/错误三类实物测试。
 - 三个故障均在 20 分钟内独立定位并回归。
 - 连续 30 分钟满足记录数、sequence、UTC、CRC、无意外复位/死锁要求。
-- 非法包、MPU 断开、W25Q64 BUSY/写保护、IWDG 卡死复位、配置断电恢复全部有证据。
+- 非法包、MPU 断开、W25Q64 BUSY/写保护、IWDG 卡死复位、配置断电恢复、RTC/VBAT 保持六类场景全部有证据。
 - P1～P50、PPT1～207、39 工程、4 资源、6 勘误、FAQ1～18 无缺项；39 工程均达到 `REIMPLEMENTED`。
 
-结论：`PASS` = ≥85 且硬门槛全过；`CONDITIONAL` = 75～84 或只缺可补证据（48 小时）；`FAIL` = <75 或任一核心考试失败；`BLOCKED` = 外部工具/硬件阻塞，需列明确补做项，不能签发结业 PASS。
+结论：`PASS` = ≥85 且硬门槛全过；`CONDITIONAL` = 70～84，或只缺一项可补证据（48 小时）；`FAIL` = <70 或任一核心考试失败；`BLOCKED` = 外部工具/硬件阻塞，需列明确补做项，不能签发结业 PASS。
 
 ## 12. 可复制给 Codex 的最终验收提示词
 
 ```text
 请执行 STM32F103 两周课程 Day14 最终验收。我授权你只读检查 D:\STM32_Project 内的源码、Git、14 天日志、构建/.map 和证据，并授权完成后将报告写入 D:\STM32_Project\AI_Review\YYYY-MM-DD_Day14_Capstone_Final.md；除该报告外不要修改源码、工程或日志，不要替我修代码，也不要执行危险的 Flash/选项字节操作。
+按北京时间（UTC+8）的 00:00～23:59 确定本次审查日期与变更范围。
 
 先读 README.md、.github\AI_REVIEW.md（若存在）、14 份计划和日志、历次报告。确认 STM32F103C8T6、CMSIS + SPL V3.5.0、Keil MDK 5.43/ArmClang 6.24，拒绝 V3.6.0/HAL/LL/CubeMX。记录基线 Git 状态；用 D:\keil\UV4\UV4.exe 对全部现有学习工程做新构建，综合项目必须核对 0 Error / 0 Warning、.map 的 Flash/RAM、栈/缓冲和内部 Flash 配置页不重叠。
 
-只读审查综合项目的 TIM 非阻塞调度、ADC+DMA、I2C1 MPU6050、OLED、USART @...\r\n 协议、SPI1 W25Q64、RTC、内部 Flash 配置、EXTI、IWDG 健康喂狗与 WFI；所有等待、边界、ISR/volatile/竞争、断电和 CRC 都要检查。硬件证据只能标 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED。
+只读审查综合项目的 TIM 非阻塞调度、ADC+DMA、I2C1 默认 PB6/PB7（不得重映射冲突 OLED）、OLED、USART @...\r\n 协议、SPI1 W25Q64、RTC、内部 Flash 配置、EXTI、IWDG 健康喂狗/降级态与 WFI；所有等待、边界、ISR/volatile/竞争、断电和 CRC 都要检查。硬件证据只能标 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED。
 
 按 Day14 规则一次只出一题：先随机完成 30 题（领域配额与题型配额严格满足，答前不提示），再从四项未知功能中随机选一项并开始 90 分钟计时，然后选择三个真实缺陷或给出三个不写入仓库的局部故障场景，每题 20 分钟。若我索要实现提示，相应项目判未通过并换题补考。
 
-核验六个完整集合恰为 P1..P50、PPT1..207、39 个工程、4 个基础资源、勘误1..6、FAQ1..18；列出每项证据落点与缺口。核对 30 分钟稳定性、非法包、MPU断开、W25 BUSY/写保护、IWDG复位、配置掉电恢复。
+核验六个完整集合恰为 P1..P50、PPT1..207、39 个工程、4 个基础资源、勘误1..6、FAQ1..18；列出每项证据落点与缺口。核对 30 分钟稳定性，以及非法包、MPU断开、W25 BUSY/按手册配置 BP/SRP 的写保护（不得只拉低 /WP）、IWDG复位、配置掉电恢复、RTC/VBAT 保持六类证据。
 
 最后按 20/30/25/15/10 的 100 分表评分，逐条检查硬门槛，输出：证据索引、代码发现（文件和行号）、覆盖矩阵、30题记录、90分钟功能、三故障、稳定性、得分、PASS/CONDITIONAL/FAIL/BLOCKED、能力雷达、NOT_PROVEN/BLOCKED 列表、重复问题、48小时补考项，以及针对弱项的后续30天巩固计划。验收阶段不要修代码。
 ```

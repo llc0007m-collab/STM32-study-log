@@ -76,7 +76,7 @@
 - [ ] LED 呼吸是对视觉/负载惯性做占空比调制；线性改变 CCR 不等于人眼感知线性，可选查 gamma，但今日验收以波形正确为主。
 - [ ] 课程 LED：TIM2_CH1/PA0，PSC=`720-1`、ARR=`100-1` → 1 kHz、1% 步距；呼吸边界不能发生无符号下溢。
 - [ ] 舵机课程条件：周期约 20 ms（50 Hz），高脉宽约 0.5～2.5 ms 对应 0～180°；不同舵机实际范围须校准，越界可能堵转。
-- [ ] 舵机课程：TIM2_CH2/PA1，1 MHz 计数（PSC=`72-1`），ARR=`20000-1`；`pulse_us = 500 + angle/180 × 2000`，CCR 等于微秒脉宽。
+- [ ] 舵机课程：TIM2_CH2/PA1，1 MHz 计数（PSC=`72-1`），ARR=`20000-1`；数学关系为 `pulse_us = 500 + angle × 2000 / 180`，C 实现应先乘后除并使用足够宽度，避免 `angle/180` 的整数截断；CCR 等于微秒脉宽。
 - [ ] 电机不可由 GPIO 直驱；TB6612 的 VM（电机电源）、VCC（逻辑）、GND、STBY、PWMA、AIN1/AIN2、AO1/AO2 职责明确且共地。
 - [ ] 课程电机：TIM2_CH3/PA2，PSC=`36-1`、ARR=`100-1` → 20 kHz；PA4/PA5 控制方向。速度命令必须饱和到 `[-100,100]`，0 的刹车/滑行策略要明确。
 - [ ] 换向先 PWM=0，等待机械/电气安全间隔，再改方向并升 PWM；上电/复位/异常时保持 PWM=0、STBY 禁止（若模块引出）。
@@ -107,7 +107,7 @@
 2. 输出比较：不看源码，写通用 TIM2 PWM 初始化与 `PWM_SetCompare1`；先固定 10%、50%、90%，用示波器/逻辑分析仪测频率/占空比，再做无下溢的呼吸。
 3. 舵机：**先不接舵机**，测 50 Hz 和 0.5/1.0/1.5/2.0/2.5 ms；合格后断电接入，逐步试角，记录机械安全范围。
 4. 电机：先验证电机/电源，再手动验证 TB6612 方向输入，再用 LED/仪器验证 MCU 的 PA2/PA4/PA5，最后接电机；完成正转、减速、停机、反转。
-5. 每个工程新构建 0 Error/0 Warning；保存 map、下载、测量和实物证据。
+5. 每个工程新构建 `0 Error / 0 Warning`；保存 map、下载、测量和实物证据。
 
 ### 6.2 今日特定迁移题
 
@@ -126,7 +126,7 @@ Codex 随机给 `CK_TIM`（应来自实际时钟树）、目标 PWM 频率、占
 - 勘误 3：`6-2` 最终版把 `TIM_ETRClockMode2Config` 滤波参数由 `0x00` 改 `0x0F` 以缓解噪声；官方还记录部分芯片 PSC=`1-1` 时卡死，可尝试 `2-1`。必须保留原始/修改后统计，不能只写“有效”。
 - [FAQ 9：外部时钟抖动/卡死](https://jiangxiekeji.com/problem/p1-9.html)：对应 0x0F 滤波和增大时基预分频；同时检查信号完整性与输入有效脉宽。
 - [FAQ 10：电机不转](https://jiangxiekeji.com/problem/p1-10.html)：依次分离程序、接线、电机/5 V、驱动模块、MCU PWM/方向输出；检查 STBY、共地、电源轨断点。官方还提示部分芯片 TIM2_CH3/PA2 异常时可换 CH1/2/4，但必须先有分段证据再迁移。
-- [FAQ 18：状态与中断函数](https://jiangxiekeji.com/problem/p1-18.html)：外部计数更新中断仍需区分状态位、使能位、pending 清除；在 SPL 源码中核对而不是凭函数名猜。
+- [FAQ 18 复习引用；主归属 Day7：状态与中断函数](https://jiangxiekeji.com/problem/p1-18.html)：外部计数更新中断仍需区分状态位、使能位、pending 清除；在 SPL 源码中核对而不是凭函数名猜。
 
 ## 8. 证据清单
 
@@ -165,16 +165,17 @@ Codex 先读 README、`.github\AI_REVIEW.md`（若有）、本计划/日志/上�
 
 ```text
 请只读验收我的 STM32 Day04 TIM/PWM 成果，禁止修改文件。
+按北京时间（UTC+8）的 00:00～23:59 确定本次审查日期与变更范围。
 固定标准：STM32F103C8T6，CMSIS+SPL V3.5.0，Keil MDK 5.43，ArmClang 6.24；禁止 V3.6.x/HAL/LL/CubeMX。
 计划：D:\STM32_Project\00_Study_Log\14_Day_STM32_Bootcamp\Day04_TIM_PWM.md
 工程：<一个或多个绝对路径>；日志：<绝对路径>；证据：<路径/附件>
 基线时间/提交：<填写>；开始/结束 git status：<填写>
 
-先读 README.md、.github\AI_REVIEW.md（若存在）、计划和上次报告。核对真实源码/uvprojx、工具链、RCC/APB 定时器时钟、ETR/滤波、复用引脚/通道、PSC/ARR/CCR、PWM 模式/极性/预装、0/100% 边界、呼吸下溢、舵机限位、TB6612 STBY/方向/PWM/饱和/安全换向与日志一致性。用 D:\keil\UV4\UV4.exe 新构建所有目标，读完整 0 Error/0 Warning 日志和 map。硬件只按证据标 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED，问题给绝对路径和行号；不要修复。
+先读 README.md、.github\AI_REVIEW.md（若存在）、计划和上次报告。核对真实源码/uvprojx、工具链、RCC/APB 定时器时钟、ETR/滤波、复用引脚/通道、PSC/ARR/CCR、PWM 模式/极性/预装、0/100% 边界、呼吸下溢、舵机限位、TB6612 STBY/方向/PWM/饱和/安全换向与日志一致性。用 D:\keil\UV4\UV4.exe 新构建所有目标，读完整 `0 Error / 0 Warning` 日志和 map。硬件只按证据标 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED，问题给绝对路径和行号；不要修复。
 
 审查后随机问 5～8 题，一次一题。覆盖公式、波形/接线预测、故障定位，并给我一组新的 CK_TIM、频率、占空比和舵机角度或电机速度，让我先算 PSC/ARR/CCR、误差、分辨率再闭卷迁移和实测。我若索要实现，标有辅助并换参数补考。
 
-按 20/30/25/15/10 评分，检查硬门槛，输出 PASS/CONDITIONAL/FAIL/BLOCKED、证据、缺项、重复问题、48 小时补考。未经后续明确授权，不写 AI_Review 文件。
+按 20/30/25/15/10 评分，检查硬门槛，输出 PASS/CONDITIONAL/FAIL/BLOCKED、证据、缺项、重复问题、48 小时补考。未经后续明确授权，不写 AI_Review 文件；授权后写入 D:\STM32_Project\AI_Review\YYYY-MM-DD_Day04_TIM_PWM.md。
 ```
 
 ## 12. 复盘与补考

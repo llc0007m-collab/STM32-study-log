@@ -132,7 +132,7 @@ PA6 在“PWM 测量”和“编码器 A”之间复用；分实验接线/初始
 
 - 今日在《程序修改说明》中**没有新增第 7 条勘误**；不得虚构。输入滤波继续使用最终有注释版的 `TIM_ICFilter=0xF` 作为课程起点，但必须以实际信号带宽验证，而非认为越大越好。
 - [FAQ 18](https://jiangxiekeji.com/problem/p1-18.html)：若用捕获/更新中断，`GetITStatus` 同时看状态位和中断使能；纯查询捕获状态使用 `GetFlagStatus`。清标志方法和允许参数需查 TIM SPL 源码。
-- [FAQ 8](https://jiangxiekeji.com/problem/p1-8.html) 对比项：该 FAQ 针对 EXTI 计次抖动；TIM 编码器/捕获虽有数字滤波，也仍需统计误计、确认输入完整性，不能把 EXTI 的“ISR 二次读脚”机械搬入硬件编码器模式。
+- [FAQ 8 复习引用；主归属 Day3](https://jiangxiekeji.com/problem/p1-8.html)：该 FAQ 针对 EXTI 计次抖动；TIM 编码器/捕获虽有数字滤波，也仍需统计误计、确认输入完整性，不能把 EXTI 的“ISR 二次读脚”机械搬入硬件编码器模式。
 
 ## 8. 证据清单
 
@@ -173,16 +173,17 @@ Codex 先读 README、`.github\AI_REVIEW.md`（若有）、本计划/日志/上�
 
 ```text
 请只读验收我的 STM32 Day05 输入捕获/PWMI/编码器成果，禁止修改文件。
+按北京时间（UTC+8）的 00:00～23:59 确定本次审查日期与变更范围。
 标准：STM32F103C8T6；CMSIS+SPL V3.5.0；Keil MDK 5.43；ArmClang 6.24；禁用 V3.6.x/HAL/LL/CubeMX。
 计划：D:\STM32_Project\00_Study_Log\14_Day_STM32_Bootcamp\Day05_TIM_Capture_Encoder.md
 工程：<绝对路径列表>；日志：<绝对路径>；证据：<路径/附件>
 基线时间/提交：<填写>；开始/结束 git status：<填写>
 
-先读 README.md、.github\AI_REVIEW.md（若存在）、本计划和上次报告。核对真实源码/uvprojx、工具链、TIM 时钟、PA0→PA6 回环、直接/间接 TI、滤波/极性/捕获预分频、TI1FP1+Reset、CCR1/CCR2 一致性、+1 约定、无信号/除零/溢出/陈旧值，以及 PA6/PA7 编码器模式、int16 模差、连续快照、CPR/Ts/RPM。用 D:\keil\UV4\UV4.exe 新构建所有目标，读完整 0 Error/0 Warning 和 map。硬件只按证据标 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED；问题给绝对路径和行号，不修复。
+先读 README.md、.github\AI_REVIEW.md（若存在）、本计划和上次报告。核对真实源码/uvprojx、工具链、TIM 时钟、PA0→PA6 回环、直接/间接 TI、滤波/极性/捕获预分频、TI1FP1+Reset、CCR1/CCR2 一致性、+1 约定、无信号/除零/溢出/陈旧值，以及 PA6/PA7 编码器模式、int16 模差、连续快照、CPR/Ts/RPM。用 D:\keil\UV4\UV4.exe 新构建所有目标，读完整 `0 Error / 0 Warning` 和 map。硬件只按证据标 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED；问题给绝对路径和行号，不修复。
 
 审查后随机问 5～8 题，一次一题，覆盖原理公式、波形/CCR 预测、故障定位。迁移题请给安全 3.3 V 未知 PWM 的时钟与量程条件但先不揭晓实际频率/占空比，让我独立选 PSC/ARR/滤波/超时并报告测量与不确定度；揭晓后算误差。我索要实现则标有辅助并换参数补考。
 
-按 20/30/25/15/10 评分，检查全部硬门槛，输出 PASS/CONDITIONAL/FAIL/BLOCKED、证据、缺项、重复问题和 48 小时补考。未经后续明确授权，不写 AI_Review 文件。
+按 20/30/25/15/10 评分，检查全部硬门槛，输出 PASS/CONDITIONAL/FAIL/BLOCKED、证据、缺项、重复问题和 48 小时补考。未经后续明确授权，不写 AI_Review 文件；授权后写入 D:\STM32_Project\AI_Review\YYYY-MM-DD_Day05_TIM_Capture_Encoder.md。
 ```
 
 ## 12. 复盘与补考

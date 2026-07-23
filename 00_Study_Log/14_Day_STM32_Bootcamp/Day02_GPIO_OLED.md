@@ -170,6 +170,7 @@
 
 ```text
 请严格验收我的 STM32 Day02 GPIO/OLED 学习成果。验收阶段只读，禁止修改源码、工程、日志和配置。
+按北京时间（UTC+8）的 00:00～23:59 确定本次审查日期与变更范围。
 
 标准：STM32F103C8T6；CMSIS + SPL V3.5.0；Keil MDK 5.43；ArmClang 6.24；禁止 V3.6.x/HAL/LL/CubeMX。
 计划：D:\STM32_Project\00_Study_Log\14_Day_STM32_Bootcamp\Day02_GPIO_OLED.md
@@ -179,7 +180,7 @@
 基线时间或提交：<填写>
 开始/结束 git status：<填写或路径>
 
-先读仓库 README.md、.github\AI_REVIEW.md（若存在）、本计划和上次报告。核对真实源码、uvprojx、工具链/SPL、所有 RCC-Port-Pin-Mode-Speed-有效电平、GPIO 输入/输出 API、OLED PB8/PB9 或我的实际迁移、位值归一、Delay/SysTick、全端口覆盖和上电安全。用 D:\keil\UV4\UV4.exe 新构建，检查完整日志 0 Error/0 Warning 和 map。只按证据确认硬件，标 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED；问题给绝对路径和行号。
+先读仓库 README.md、.github\AI_REVIEW.md（若存在）、本计划和上次报告。核对真实源码、uvprojx、工具链/SPL、所有 RCC-Port-Pin-Mode-Speed-有效电平、GPIO 输入/输出 API、OLED PB8/PB9 或我的实际迁移、位值归一、Delay/SysTick、全端口覆盖和上电安全。用 D:\keil\UV4\UV4.exe 新构建，检查完整日志 `0 Error / 0 Warning` 和 map。只按证据确认硬件，标 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED；问题给绝对路径和行号。
 
 静态审查后从原理、接线预测、故障定位、迁移中随机出 5～8 题，一次只问一题。迁移必须指定一个合适的新 LED/按键引脚并反转有效电平，让我先写引脚表再独立修改；我索要实现就标“有辅助”并换参数补考。
 

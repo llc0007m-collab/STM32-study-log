@@ -208,7 +208,7 @@ I2C上拉近似上升时间 tr ≈ 0.8473 × Rp × Cb
 接线/上拉/供电与波形：<填写>
 WHO_AM_I、配置读回、六轴数据：<填写>
 
-先读 D:\STM32_Project\README.md、D:\STM32_Project\.github\AI_REVIEW.md（若存在）、本 Day08 计划和上一份报告。确认 STM32F103C8T6 + CMSIS + SPL V3.5.0 + Keil MDK 5.43/ArmClang 6.24，禁止 HAL/LL/CubeMX/V3.6.x。只读检查 uvprojx、启动文件、宏、Include Paths、PB10/PB11开漏、上拉与总线初态、START/STOP/字节/ACK、地址7位与8位、重复起始、多字节末尾NACK、NACK/超时/恢复、!!位值归一勘误、MPU6050初始化和有符号拼接。用 D:\keil\UV4\UV4.exe 重新构建并读新日志/map；列出绝对文件路径和行号，不编造硬件现象。证据分 VERIFIED、USER_REPORTED、NOT_PROVEN、BLOCKED。
+先读 D:\STM32_Project\README.md、D:\STM32_Project\.github\AI_REVIEW.md（若存在）、本 Day08 计划和上一份报告。确认 STM32F103C8T6 + CMSIS + SPL V3.5.0 + Keil MDK 5.43/ArmClang 6.24，禁止 HAL/LL/CubeMX/V3.6.x。只读检查 uvprojx、启动文件、宏、Include Paths、PB10/PB11开漏、上拉与总线初态、START/STOP/字节/ACK、地址7位与8位、重复起始、多字节末尾NACK、NACK/超时/恢复、!!位值归一勘误、MPU6050初始化和有符号拼接。用 D:\keil\UV4\UV4.exe 重新构建并读新日志（必须 `0 Error / 0 Warning`）/map；列出绝对文件路径和行号，不编造硬件现象。证据分 VERIFIED、USER_REPORTED、NOT_PROVEN、BLOCKED。
 
 随后随机问7题，一次一题、回答前不提示：2题I2C原理/波形、1题地址或公式、1题MPU寄存器/换算、1题接线预测、1题故障、1题迁移。迁移题让我实现你指定起始寄存器/长度的 MPU6050_ReadRegs，覆盖len=0、NACK、末字节NACK和超时；若我请求实现提示，标“有辅助”并换参数重考。
 

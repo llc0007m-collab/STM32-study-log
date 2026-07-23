@@ -91,7 +91,7 @@
 - [ ] 状态位为 1 不代表 ISR 一定执行：还需要外设中断使能、NVIC、优先级/屏蔽和正确向量。
 - [ ] 清标志写法因外设不同，必须调用正确 SPL API 或依参考手册；不可把“写 0 清/写 1 清”跨外设套用。
 
-## 5. 引脚/中断/时钟表
+## 5. 引脚/接线/中断/时钟表
 
 | 功能 | 课程参考 | 输入模式/映射 | IRQ/优先级 | 实际连接或参数 | 验证 |
 |---|---|---|---|---|---|
@@ -130,7 +130,7 @@ Codex 从空闲且非 SWD 的引脚中指定一个**不同编号的 EXTI 线**�
 
 - 勘误 1/2：`5-1` 和 `5-2` 最终版在进入 ISR 后再次读取触发脚，只有电平仍符合时才计数/判向，以缓解模块假沿。必须实现并说明局限：这不是通用消抖；若信号质量差，应考虑输入滤波、定时确认或硬件整形。
 - [FAQ 8：两项 EXTI 计次数值抖动](https://jiangxiekeji.com/problem/p1-8.html)：模块抖动可让上/下降沿都成串出现，因此单改触发边沿可能无效；按最终源码二次读脚并做 50 次统计。
-- [FAQ 18：四个状态/中断函数区别](https://jiangxiekeji.com/problem/p1-18.html)：能从 `SR/DIER`（TIM）或 `PR/IMR`（EXTI）解释 `GetFlagStatus/ClearFlag/GetITStatus/ClearITPendingBit`，并指出参数范围可能不同。
+- [FAQ 18 复习引用；主归属 Day7：四个状态/中断函数区别](https://jiangxiekeji.com/problem/p1-18.html)：能从 `SR/DIER`（TIM）或 `PR/IMR`（EXTI）解释 `GetFlagStatus/ClearFlag/GetITStatus/ClearITPendingBit`，并指出参数范围可能不同。
 
 ## 8. 证据清单
 
@@ -169,16 +169,17 @@ Codex 先读仓库 README、`.github\AI_REVIEW.md`（若有）、本计划、今
 
 ```text
 请只读验收我的 STM32 Day03 EXTI/NVIC/TIM 时基成果，禁止修改任何文件。
+按北京时间（UTC+8）的 00:00～23:59 确定本次审查日期与变更范围。
 标准：STM32F103C8T6，CMSIS+SPL V3.5.0，Keil MDK 5.43，ArmClang 6.24；禁用 V3.6.x/HAL/LL/CubeMX。
 计划：D:\STM32_Project\00_Study_Log\14_Day_STM32_Bootcamp\Day03_EXTI_TIM_Base.md
 工程：<绝对路径>；日志：<绝对路径>；证据：<路径/附件>
 基线时间/提交：<填写>；开始/结束 git status：<填写>
 
-先读 README.md、.github\AI_REVIEW.md（若存在）、计划和上次报告。核对真实源码/uvprojx、工具链、GPIO→AFIO→EXTI→NVIC、Line/IRQ/ISR、共享向量、优先级分组、volatile/竞态、ISR 阻塞、勘误二次读脚、TIM2 时钟来源与 PSC/ARR/清 UIF。使用 D:\keil\UV4\UV4.exe 新构建并检查 0 Error/0 Warning、map。硬件只按证据标 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED；问题给绝对路径和行号。
+先读 README.md、.github\AI_REVIEW.md（若存在）、计划和上次报告。核对真实源码/uvprojx、工具链、GPIO→AFIO→EXTI→NVIC、Line/IRQ/ISR、共享向量、优先级分组、volatile/竞态、ISR 阻塞、勘误二次读脚、TIM2 时钟来源与 PSC/ARR/清 UIF。使用 D:\keil\UV4\UV4.exe 新构建并检查 `0 Error / 0 Warning`、map。硬件只按证据标 VERIFIED/USER_REPORTED/NOT_PROVEN/BLOCKED；问题给绝对路径和行号。
 
 审查后从原理/公式、波形与优先级预测、故障定位、迁移中随机问 5～8 题，一次一题。迁移题请指定一个空闲、非 SWD、且编号不同于 14 的 EXTI 引脚，让我独立改 Port/Pin/Source/Line/IRQ/ISR 并设计和 TIM2 的优先级；索要实现就换题补考。
 
-按 20/30/25/15/10 评分，检查硬门槛，给 PASS/CONDITIONAL/FAIL/BLOCKED、证据、缺项、重复问题和 48 小时补考。未经我之后明确授权，不写 AI_Review 报告文件。
+按 20/30/25/15/10 评分，检查硬门槛，给 PASS/CONDITIONAL/FAIL/BLOCKED、证据、缺项、重复问题和 48 小时补考。未经我之后明确授权，不写 AI_Review 报告文件；授权后写入 D:\STM32_Project\AI_Review\YYYY-MM-DD_Day03_EXTI_TIM_Base.md。
 ```
 
 ## 12. 复盘/补考
