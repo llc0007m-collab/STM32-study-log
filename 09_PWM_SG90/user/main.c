@@ -2,18 +2,19 @@
 #include "Delay.h"
 #include "OLED.h"
 #include "SG90.h"
+#include "key.h"
 
-uint8_t i;
+extern float angle;
 
 int main (void)
 {
 	OLED_Init();
 	Servo_Init();
+	KEY_Init();
 	
-	Set_Angle(90);
 	
 while (1)
 {
-
+	OLED_ShowNum(1,1,angle,3);
 }
 }

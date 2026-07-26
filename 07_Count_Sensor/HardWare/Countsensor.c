@@ -12,13 +12,13 @@ void Init_Count(void)
 	
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource14);
 	
-	EXTI_InitTypeDef EXTI_I ;
-	EXTI_I.EXTI_Line = EXTI_Line14;
-	EXTI_I.EXTI_LineCmd = ENABLE;
-	EXTI_I.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_I.EXTI_Trigger = EXTI_Trigger_Falling;
+	EXTI_InitTypeDef EXTI_InitStruct ;
+	EXTI_InitStruct.EXTI_Line = EXTI_Line14;
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
 	
-	EXTI_Init(&EXTI_I);
+	EXTI_Init(&EXTI_InitStruct);
 	
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	NVIC_InitTypeDef NVIC_InitStruct;
